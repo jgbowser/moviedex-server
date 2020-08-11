@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
 const movieData = require('./movie-data.json');
+const { response } = require('express');
 
 const app = express();
 
@@ -54,6 +55,9 @@ function handleAvgVoteSearch(req, res, next) {
   if (avg_vote) {
     const number = Number(avg_vote);
     let movies = [...movieData.movies];
+    if(Number.isNaN(number)) {
+      return res.status(400).send('avg_vote must be a number');
+    }
     movies = movies.filter(movie => movie.avg_vote >= number);
     return res.status(200).json(movies);
   }
@@ -61,6 +65,7 @@ function handleAvgVoteSearch(req, res, next) {
 }
 
 //API Request/Response handler
-app.get('/movie', handleGenreSearch, handleCountrySearch, handleAvgVoteSearch,(req, res) => res.send('Please provide search term: genre, country or average vote'));
+app.get('/movie', handleGenreSearch, handleCountrySearch, handleAvgVoteSearch,(req, res) => 
+  res.send('Please provide a search term for one of the following: genre(string), country(string), or avg_vote(number)'));
 
 app.listen(8000, () => console.log('Listening on PORT 8000'));
