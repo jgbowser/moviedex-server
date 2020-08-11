@@ -8,6 +8,8 @@ const movieData = require('./movie-data.json');
 const app = express();
 
 app.use(morgan('dev'));
+app.use(helmet());
+app.use(cors());
 app.use(validateBearerToken);
 
 // Search Handler/Utility functions
@@ -34,8 +36,31 @@ function handleGenreSearch(req, res, next) {
   next();
 }
 
+function handleCountrySearch(req, res, next) {
+  const { country } = req.query;
+
+  if (country) {
+    const countryLower = country.toLowerCase();
+    let movies = [...movieData.movies];
+    movies = movies.filter(movie => movie.country.toLowerCase().includes(countryLower));
+    return res.status(200).json(movies);
+  }
+  next();
+}
+
+function handleAvgVoteSearch(req, res, next) {
+  const { avg_vote } = req.query;
+
+  if (avg_vote) {
+    const number = Number(avg_vote);
+    let movies = [...movieData.movies];
+    movies = movies.filter(movie => movie.avg_vote >= number);
+    return res.status(200).json(movies);
+  }
+  next();
+}
 
 //API Request/Response handler
-app.get('/movie', handleGenreSearch, (req, res) => res.send('Hello'));
+app.get('/movie', handleGenreSearch, handleCountrySearch, handleAvgVoteSearch,(req, res) => res.send('Please provide search term: genre, country or average vote'));
 
 app.listen(8000, () => console.log('Listening on PORT 8000'));
