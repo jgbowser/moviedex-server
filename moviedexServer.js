@@ -64,8 +64,11 @@ function handleAvgVoteSearch(req, res, next) {
   next();
 }
 
+function getAllMovies(req, res) {
+  res.status(200).json(movieData.movies);
+}
+
 //API Request/Response handler
-app.get('/movie', handleGenreSearch, handleCountrySearch, handleAvgVoteSearch,(req, res) => 
-  res.send('Please provide a search term for one of the following: genre(string), country(string), or avg_vote(number)'));
+app.get('/movie', handleGenreSearch, handleCountrySearch, handleAvgVoteSearch, getAllMovies);
 
 app.listen(8000, () => console.log('Listening on PORT 8000'));
