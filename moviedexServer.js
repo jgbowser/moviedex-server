@@ -4,11 +4,12 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
 const movieData = require('./movie-data.json');
-const { response } = require('express');
+
 
 const app = express();
 
-app.use(morgan('dev'));
+const morganOption = process.env.NODE_ENV === 'production' ? 'tiny': 'dev'
+app.use(morgan(morganOption));
 app.use(helmet());
 app.use(cors());
 app.use(validateBearerToken);
@@ -71,4 +72,16 @@ function getAllMovies(req, res) {
 //API Request/Response handler
 app.get('/movie', handleGenreSearch, handleCountrySearch, handleAvgVoteSearch, getAllMovies);
 
-app.listen(8000, () => console.log('Listening on PORT 8000'));
+app.use((error, req, res, next) => {
+  let response
+  if(process.env.NODE_ENV === 'production') {
+    response = { error: { message: 'Server error' } }
+  } else {
+    response = { error }
+  }
+  res.status(500).json(response)
+})
+
+const PORT = process.env.PORT || 8000
+
+app.listen(PORT, () => console.log('Listening on PORT 8000'));
